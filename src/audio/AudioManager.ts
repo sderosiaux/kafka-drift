@@ -38,10 +38,16 @@ export class AudioManager {
     this.currentScene = 'none';
   }
 
-  onCollect() { if (!this.muted) this.synth.playCollect(); }
+  onCollect(combo = 0) { if (!this.muted) this.synth.playCollect(combo); }
+  onSchema() { if (!this.muted) this.synth.playSchema(); }
+  onPowerUp() { if (!this.muted) this.synth.playPowerUp(); }
   onCombo() { if (!this.muted) this.synth.playCombo(); }
   onPoison() { if (!this.muted) this.synth.playPoison(); }
+  onTombstone() { if (!this.muted) this.synth.playTombstone(); }
+  onCheckpoint() { if (!this.muted) this.synth.playCheckpoint(); }
+  onBoost() { if (!this.muted) this.synth.playBoost(); }
   onLevelUp() { if (!this.muted) this.synth.playLevelUp(); }
+  onLagWarning() { if (!this.muted) this.synth.playLagWarning(); }
 }
 
 export const audio = new AudioManager();

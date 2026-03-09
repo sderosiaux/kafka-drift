@@ -12,6 +12,7 @@ import { gameState } from '../state/GameState';
 import { TOPICS, type TopicConfig } from '../state/TopicData';
 import { DataParticles, CollectBurst } from '../effects/Particles';
 import { PostProcessing } from '../engine/PostProcessing';
+import { audio } from '../audio/AudioManager';
 
 const POWER_UP_TYPES = ['compaction-burst', 'compression-wave', 'exactly-once-shield', 'rewind'] as const;
 type PowerUpType = typeof POWER_UP_TYPES[number];
@@ -64,6 +65,8 @@ export class DriftScene implements GameScene {
 
   // Fix 4: Pause
   private isPaused = false;
+  private wasBoosting = false;
+  private lagWarningCooldown = 0;
 
   constructor(canvas: HTMLElement) {
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
@@ -197,6 +200,8 @@ export class DriftScene implements GameScene {
     this.powerUpInventory = [];
     this.compressionWaveTimer = 0;
     this.exactlyOnceShield = false;
+    this.wasBoosting = false;
+    this.lagWarningCooldown = 0;
 
     // R2: Pointer lock — try to lock, but may fail outside user gesture.
     // Canvas click handler will re-lock if needed.
@@ -357,7 +362,9 @@ export class DriftScene implements GameScene {
     }
 
     // Boost (Fix 5: boostDuration tech effect multiplies boost speed)
-    if (input.isDown('ShiftLeft') || input.isDown('ShiftRight')) {
+    const isBoosting = input.isDown('ShiftLeft') || input.isDown('ShiftRight');
+    if (isBoosting) {
+      if (!this.wasBoosting) audio.onBoost();
       const boostDurationMult = gameState.getEffect('boostDuration') || 1;
       this.speed = (this.topicConfig?.speed ?? 10) * 1.8 * boostDurationMult;
       this.corridor.setSpeed(this.speed);
@@ -377,6 +384,8 @@ export class DriftScene implements GameScene {
       this.corridor.setSpeed(this.speed);
       this.hud.setSpeedLines(0);
     }
+
+    this.wasBoosting = isBoosting;
 
     // Apply speed debuff on top of calculated speed
     this.speed *= this.speedDebuffMult;
@@ -444,30 +453,34 @@ export class DriftScene implements GameScene {
         this.runMessages += Math.ceil(item.value * valueMult * Math.max(1, comboMult) * forkMult);
         this.combo++;
         this.comboTimer = 2;
+        audio.onCollect(this.combo);
+        if (this.combo > 0 && this.combo % 5 === 0) audio.onCombo();
       } else if (item.type === 'schema') {
         const schemaMult = gameState.getEffect('schemaValue') || 1;
         const forkMult = this.currentBranch === 'right' ? 2 : 1;
         this.runSchemas += Math.ceil(item.value * schemaMult * forkMult);
         this.combo++;
         this.comboTimer = 2;
+        audio.onSchema();
       } else if (item.type === 'poison-pill') {
         this.combo = 0;
         this.applySpeedDebuff(0.5, 2);
+        audio.onPoison();
       } else if (item.type === 'tombstone') {
-        // Tombstones reduce combo timer by 1s, making combo harder to maintain
         this.comboTimer = Math.max(0, this.comboTimer - 1);
         if (this.comboTimer <= 0) {
           this.combo = 0;
           this.hud.hideCombo();
         }
+        audio.onTombstone();
       } else if (item.type === 'power-up') {
-        // R6: Collect power-up (max 3)
         if (this.powerUpInventory.length < 3) {
           const puType = POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
           this.powerUpInventory.push(puType);
           this.hud.updatePowerUp(this.powerUpInventory[0]);
           this.hud.showCenter(`POWER-UP: ${puType.toUpperCase()}`, 1500);
           this.collectBurst.emit(item.position, 0x00ffff);
+          audio.onPowerUp();
         }
       }
     }
@@ -501,6 +514,7 @@ export class DriftScene implements GameScene {
           mat.emissive.setHex(0xffd700);
         }
         this.hud.showCenter('CHECKPOINT!', 1000);
+        audio.onCheckpoint();
       }
 
       // compaction-zone: award bonus messages on first entry
@@ -545,6 +559,13 @@ export class DriftScene implements GameScene {
           this.hud.showCenter('QUOTA THROTTLED!', 1500);
         }
       }
+    }
+
+    // Lag warning sound
+    if (this.lagWarningCooldown > 0) this.lagWarningCooldown -= delta;
+    if (this.lagWave.dangerLevel > 0.6 && this.lagWarningCooldown <= 0) {
+      audio.onLagWarning();
+      this.lagWarningCooldown = 3;
     }
 
     // Update HUD
