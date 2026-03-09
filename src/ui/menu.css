@@ -1,0 +1,112 @@
+.main-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+}
+
+.menu-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0a0010 0%, #1a0030 50%, #0a0010 100%);
+  z-index: -1;
+}
+
+.menu-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px, rgba(255, 105, 180, 0.02) 2px, rgba(255, 105, 180, 0.02) 4px
+  );
+}
+
+.menu-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.menu-title {
+  font-size: 72px;
+  color: #ff69b4;
+  text-shadow:
+    0 0 20px #ff1493,
+    0 0 40px #ff1493,
+    0 0 80px #ff69b4;
+  letter-spacing: 12px;
+  margin-bottom: 10px;
+  animation: titlePulse 3s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%, 100% { text-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493, 0 0 80px #ff69b4; }
+  50% { text-shadow: 0 0 30px #ff1493, 0 0 60px #ff1493, 0 0 120px #ff69b4; }
+}
+
+.menu-subtitle {
+  font-size: 16px;
+  color: #00ffff;
+  letter-spacing: 4px;
+  margin-bottom: 40px;
+  text-shadow: 0 0 10px #00ffff;
+}
+
+.menu-start {
+  display: inline-block;
+  padding: 15px 40px;
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  color: #ff69b4;
+  background: transparent;
+  border: 2px solid #ff69b4;
+  cursor: pointer;
+  letter-spacing: 4px;
+  transition: all 0.3s;
+  text-shadow: 0 0 10px #ff1493;
+  animation: startPulse 2s ease-in-out infinite;
+}
+
+.menu-start:hover {
+  background: rgba(255, 105, 180, 0.1);
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+}
+
+@keyframes startPulse {
+  0%, 100% { border-color: #ff69b4; }
+  50% { border-color: #00ffff; }
+}
+
+.menu-controls {
+  margin-top: 50px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 20px;
+  font-size: 12px;
+  color: #555;
+}
+
+.menu-controls span {
+  padding: 4px 10px;
+  border: 1px solid #222;
+  border-radius: 3px;
+}
+
+.idle-reward {
+  margin-bottom: 30px;
+  padding: 15px 25px;
+  border: 1px solid #00ff8833;
+  color: #00ff88;
+  font-size: 14px;
+  text-shadow: 0 0 10px #00ff88;
+}
+
+.idle-reward strong {
+  font-size: 24px;
+  display: block;
+  margin-top: 5px;
+  color: #ffd700;
+}
