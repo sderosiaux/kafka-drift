@@ -129,6 +129,29 @@ export class HubScene implements GameScene {
     this.launchPortal.onLaunch = (topicId) => {
       this.onLaunchRun?.(topicId);
     };
+
+    // Pressing F at portal opens topic select, selecting launches immediately
+    this.launchPortal.trigger.onAction = () => {
+      if (this.launchPortal.isActive) {
+        // Already activated — walk through to launch
+        if (!this.launchPortal.isLaunching) {
+          this.launchPortal.setLaunching(true);
+          this.launchPortal.onLaunch?.(this.launchPortal.topicId!);
+        }
+      } else {
+        // Not activated — open topic select, then launch on pick
+        this.uiOpen = true;
+        this.controls.unlock();
+        this.topicUI.show(
+          (topicId) => {
+            this.launchPortal.activate(topicId);
+            this.launchPortal.setLaunching(true);
+            this.launchPortal.onLaunch?.(topicId);
+          },
+          () => { this.uiOpen = false; this.controls.lock(); }
+        );
+      }
+    };
   }
 
   setOnLaunch(cb: (topicId: string) => void) { this.onLaunchRun = cb; }
@@ -183,6 +206,7 @@ export class HubScene implements GameScene {
     this.consumerStation.trigger.update(this.camera.position, actionPressed);
     this.pipelineStation.trigger.update(this.camera.position, actionPressed);
     this.statsWall.trigger.update(this.camera.position, actionPressed);
+    this.launchPortal.trigger.update(this.camera.position, actionPressed);
 
     // Check portal walk-through
     if (this.launchPortal.checkWalkThrough(this.camera.position)) {

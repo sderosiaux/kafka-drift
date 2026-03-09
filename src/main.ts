@@ -58,13 +58,13 @@ window.addEventListener('keydown', (e) => {
 });
 
 loading.setProgress(100);
+loading.hide();
 
 // Main menu
 const mainMenu = new MainMenu();
 const idleEarned = gameState.calcIdleIncome();
 
 mainMenu.show(idleEarned, () => {
-  loading.hide();
   audio.enterHub();
   engine.switchTo('hub');
   engine.start();

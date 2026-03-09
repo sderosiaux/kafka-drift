@@ -71,6 +71,9 @@ export class DriftScene implements GameScene {
 
     // R2: PointerLockControls for free-look FPS during drift
     this.controls = new PointerLockControls(this.camera, canvas);
+    canvas.addEventListener('click', () => {
+      if (this.isRunning && !this.isPaused) this.controls.lock();
+    });
 
     this.scene.background = new THREE.Color(0x0a0010);
     this.scene.fog = new THREE.FogExp2(0x0a0010, 0.008);
@@ -195,8 +198,9 @@ export class DriftScene implements GameScene {
     this.compressionWaveTimer = 0;
     this.exactlyOnceShield = false;
 
-    // R2: Lock pointer for free-look
-    this.controls.lock();
+    // R2: Pointer lock — try to lock, but may fail outside user gesture.
+    // Canvas click handler will re-lock if needed.
+    try { this.controls.lock(); } catch (_) { /* handled by canvas click */ }
 
     // Apply tech tree effects
     const speedMult = gameState.getEffect('speedMultiplier') || 1;

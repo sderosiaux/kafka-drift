@@ -9,7 +9,13 @@ export class LaunchPortal {
   private particlePositions: Float32Array;
   private isActivated = false;
   private selectedTopicId: string | null = null;
+  private launching = false;
   onLaunch: ((topicId: string) => void) | null = null;
+
+  get isActive() { return this.isActivated; }
+  get isLaunching() { return this.launching; }
+  get topicId() { return this.selectedTopicId; }
+  setLaunching(v: boolean) { this.launching = v; }
 
   constructor() {
     this.group.position.set(0, 0, -18);
@@ -120,8 +126,10 @@ export class LaunchPortal {
       'Walk into the portal to launch'
     );
 
+    // Default onAction — overridden by HubScene for richer flow
     this.trigger.onAction = () => {
-      if (this.isActivated && this.selectedTopicId) {
+      if (this.isActivated && this.selectedTopicId && !this.launching) {
+        this.launching = true;
         this.onLaunch?.(this.selectedTopicId);
       }
     };
@@ -137,6 +145,7 @@ export class LaunchPortal {
   deactivate() {
     this.isActivated = false;
     this.selectedTopicId = null;
+    this.launching = false;
     const mat = this.torus.material as THREE.ShaderMaterial;
     mat.uniforms.uColor.value.setHex(0x4400aa);
   }
@@ -174,8 +183,9 @@ export class LaunchPortal {
 
   checkWalkThrough(playerPos: THREE.Vector3): boolean {
     if (!this.isActivated) return false;
-    const portalPos = new THREE.Vector3(0, 0, -18);
-    const dist = playerPos.distanceTo(portalPos);
-    return dist < 2;
+    const dx = playerPos.x;
+    const dz = playerPos.z + 18;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+    return dist < 3;
   }
 }
