@@ -2,14 +2,14 @@
 
 3D first-person hoverboard game built with Three.js. Surf through Kafka topic corridors in a synthwave aesthetic, collect messages, dodge obstacles, and outrun the consumer lag wave.
 
-## Play
+**[Play now](https://sderosiaux.github.io/kafka-drift/)**
+
+## Local dev
 
 ```bash
 npm install
 npm run dev
 ```
-
-Open http://localhost:5173
 
 ## Controls
 
@@ -36,8 +36,9 @@ Open http://localhost:5173
 - **Stats Wall** — real-time stats and progress
 
 **Drift Run** — FPS hoverboard through a corridor:
-- Collect glowing messages (currency) and golden schemas (rare currency)
-- Dodge poison pills, tombstones, broker failures, network partitions
+- Collect messages — normal pink cubes, large high-value cubes (3x), tiny bursts (clusters of small ones), compressed purple dodecahedrons (2x)
+- Grab golden schemas (rare Avro/Protobuf currency)
+- Dodge red spiky poison pills, dark tombstones, broker failures, network partitions
 - Choose partition lanes at corridor forks (safe/normal/risky paths)
 - Collect power-ups: Compaction Burst, Compression Wave, Exactly-Once Shield, Rewind
 - Hit checkpoints for respawn charges

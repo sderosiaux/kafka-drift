@@ -239,6 +239,7 @@ export class DriftScene implements GameScene {
       retentionMultiplier,
     });
     this.collectibles.setEnabledObstacles(this.topicConfig.obstacles);
+    this.collectibles.prePopulate();
     this.obstacles.setSpeed(this.speed);
     this.obstacles.setEnabledTypes(this.topicConfig.obstacles);
 
